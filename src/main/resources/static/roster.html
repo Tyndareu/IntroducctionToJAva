@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Player List</title>
+</head>
+<body>
+<h1>Player List</h1>
+
+<ul id="player-list"></ul>
+
+<label for="email-input">Email:</label>
+<input type="text" id="email-input">
+<button id="add-button">Add</button>
+
+<script>
+    // Get references to HTML elements
+    const playerList = document.getElementById('player-list');
+    const emailInput = document.getElementById('email-input');
+    const addButton = document.getElementById('add-button');
+
+    // Function to fetch and display the list of players
+    function fetchPlayers() {
+      fetch('/players')
+        .then(response => response.json())
+        .then(data => {
+          // Clear the player list
+          playerList.innerHTML = '';
+
+          // Get the players array from the JSON object
+          const players = data._embedded.players;
+
+          // Build and append <li> elements for each player
+          players.forEach(player => {
+            const listItem = document.createElement('li');
+            listItem.textContent = player.email;
+            playerList.appendChild(listItem);
+          });
+        });
+    }
+
+    // Function to add a new player
+    function addPlayer() {
+      const email = emailInput.value;
+
+      // Check if an email address is entered
+      if (email) {
+        const playerData = {
+          email: email
+        };
+
+        // Send a POST request to add the new player
+        fetch('/players', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(playerData)
+        })
+          .then(() => {
+            // Get and display the updated player list
+            fetchPlayers();
+          });
+
+        // Clear the text input
+        emailInput.value = '';
+      }
+    }
+
+    // Add an event listener to the "Add" button
+    addButton.addEventListener('click', addPlayer);
+
+    // Get and display the initial player list
+    fetchPlayers();
+  </script>
+</body>
+</html>
